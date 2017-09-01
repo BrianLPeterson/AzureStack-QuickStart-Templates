@@ -28,6 +28,13 @@
         "description": "Number of VMs to create."
       }
     },
+    "batchSize": {
+      "type": "int",
+      "defaultValue": "[parameters('vmCount')]",
+      "metadata": {
+        "description": "Number of VMs to create in a batch."
+      }
+    },
     "vmSize": {
       "type": "string",
       "defaultValue": "Standard_A2",
@@ -78,7 +85,7 @@
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "nsgName": "[concat('ng', resourceGroup().name)]",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
-    "modulesPath": "https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/bootstorm-vm-boot-time/",
+    "modulesPath": "https://raw.githubusercontent.com/BrianLPeterson/AzureStack-QuickStart-Templates/master/bootstorm-vm-boot-time/",
     "moduleVMBootAll": "VMBootAll.zip",
     "modulesUrlVMBootAll": "[concat(variables('modulesPath'),variables('moduleVMBootAll'))]",
     "configurationFunctionVMBootAll": "VMBootAll.ps1\\ConfigureVMBootAll",
@@ -196,8 +203,7 @@
       "name": "[variables('vmName')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/',variables('vmNicName'))]"
+        "vmLoop"
       ],
       "properties": {
         "hardwareProfile": {
@@ -247,6 +253,8 @@
       "copy": {
         "name": "vmLoop",
         "count": "[parameters('vmCount')]"
+        "mode": "Serial",
+        "batchSize": "[parameters('batchSize')]"
       },
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/',variables('uniqueStorageAccountName'))]",
