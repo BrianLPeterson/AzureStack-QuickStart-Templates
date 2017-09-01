@@ -252,7 +252,7 @@
       "location": "[variables('location')]",
       "copy": {
         "name": "vmLoop",
-        "count": "[parameters('vmCount')]"
+        "count": "[parameters('vmCount')]",
         "mode": "Serial",
         "batchSize": "[parameters('batchSize')]"
       },
