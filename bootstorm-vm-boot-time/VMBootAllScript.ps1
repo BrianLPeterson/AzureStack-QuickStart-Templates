@@ -204,7 +204,7 @@ function VMBootAll {
                 }
                 $d = Get-Date
                 "$d VM $_vmName Stopped" | Tee-Object -FilePath $logFile -Append
-            } -ArgumentList $_vmName,$vm.ResourceGroupName,$location,$logFilePath,$AzureSubscription,$resourceManagerEndpoint,$token | Out-Null
+            } -ArgumentList $_vmName,$vm.ResourceGroupName,$location,$logFilePath,$AzureSubscription,$resourceManagerEndpoint,$azureToken | Out-Null
             $resourceGroupName = $vm.ResourceGroupName
         }
     }
@@ -314,9 +314,10 @@ function VMBootAll {
                         ContentType = "application/json"
                     }
 
-                "URI: $($getAzureVM.Uri)" | Tee-Object -FilePath $logFilePath -Append
+                "URI: $($getAzureVM.Uri)" | Tee-Object -FilePath $logFile -Append
 
                 $result = Invoke-RestMethod @getAzureVM
+
 
                 $_statusBootEndTime = $result.Statuses | Select-Object Time | Where-Object {$_.Time -ne $null}
 
@@ -334,7 +335,7 @@ function VMBootAll {
                 }
                 return $_vmBootResult
 
-            } -ArgumentList $vm.Name,$vm.ResourceGroupName,$location,$logFilePath,$AzureSubscription,$resourceManagerEndpoint, $token | Out-Null
+            } -ArgumentList $vm.Name,$vm.ResourceGroupName,$location,$logFilePath,$AzureSubscription,$resourceManagerEndpoint, $azureToken | Out-Null
         }
     }
     
