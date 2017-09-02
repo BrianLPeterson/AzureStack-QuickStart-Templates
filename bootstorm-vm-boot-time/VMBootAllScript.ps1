@@ -204,7 +204,7 @@ function VMBootAll {
                 }
                 $d = Get-Date
                 "$d VM $_vmName Stopped" | Tee-Object -FilePath $logFile -Append
-            } -ArgumentList $_vmName,$vm.ResourceGroupName,$location,$logFile,$AzureSubscription,$resourceManagerEndpoint,$token | Out-Null
+            } -ArgumentList $_vmName,$vm.ResourceGroupName,$location,$logFilePath,$AzureSubscription,$resourceManagerEndpoint,$token | Out-Null
             $resourceGroupName = $vm.ResourceGroupName
         }
     }
@@ -334,7 +334,7 @@ function VMBootAll {
                 }
                 return $_vmBootResult
 
-            } -ArgumentList $vm.Name,$vm.ResourceGroupName,$location,$logFile,$AzureSubscription,$resourceManagerEndpoint, $token | Out-Null
+            } -ArgumentList $vm.Name,$vm.ResourceGroupName,$location,$logFilePath,$AzureSubscription,$resourceManagerEndpoint, $token | Out-Null
         }
     }
     
