@@ -204,10 +204,14 @@ function VMBootAll {
                 }
                 $d = Get-Date
                 "$d VM $_vmName Stopped" | Tee-Object -FilePath $logFile -Append
-            } -ArgumentList $_vmName,$vm.ResourceGroupName,$location,$logFilePath,$AzureSubscription,$resourceManagerEndpoint,$azureToken | Out-Null
+            } -ArgumentList $_vmName,$vm.ResourceGroupName,$location,$logFile,$AzureSubscription,$resourceManagerEndpoint,$azureToken | Out-Null
+
             $resourceGroupName = $vm.ResourceGroupName
         }
     }
+
+    $numberOfRetries = 60
+
     # Wait for background jobs
     $jobs = Get-Job | Where-Object {$_.State -eq "Running"}
     $noOfRetries = $numberOfRetries
@@ -218,6 +222,7 @@ function VMBootAll {
         $jobs = Get-Job | Where-Object {$_.State -eq "Running"}
     }
     "Done waiting for VMs to all be stopped." | Tee-Object -FilePath $logFilePath -Append
+
     # Clear background jobs
     Get-Job | Remove-Job -Force -Confirm:0
 
@@ -318,8 +323,7 @@ function VMBootAll {
 
                 $result = Invoke-RestMethod @getAzureVM
 
-
-                $_statusBootEndTime = $result.Statuses | Select-Object Time | Where-Object {$_.Time -ne $null}
+                $_statusBootEndTime = $result.Properties.InstanceView.Statuses[0] | Select-Object Time | Where-Object {$_.Time -ne $null}
 
                 # Create custom vm boot result object
                 $_vmBootResult = "" | Select-Object VMName, VMBootStartTime, VMBootEndTime, VMBootTimeInSeconds
@@ -335,7 +339,7 @@ function VMBootAll {
                 }
                 return $_vmBootResult
 
-            } -ArgumentList $vm.Name,$vm.ResourceGroupName,$location,$logFilePath,$AzureSubscription,$resourceManagerEndpoint, $azureToken | Out-Null
+            } -ArgumentList $vm.Name,$vm.ResourceGroupName,$location,$logFile,$AzureSubscription,$resourceManagerEndpoint, $azureToken | Out-Null
         }
     }
     
