@@ -314,7 +314,7 @@ function VMBootAll {
                 "Boot succeeded at $_dateAfterBoot" | Tee-Object -FilePath $logFile -Append
                 # Get VM Boot End Time (Ignore NULL values of Time)
 
-                $numberOfRetries = 30
+                $numberOfRetries = 60
                 $retries = 0
 
                 do
