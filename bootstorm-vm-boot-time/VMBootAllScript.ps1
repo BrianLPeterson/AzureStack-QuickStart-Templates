@@ -343,7 +343,7 @@ function VMBootAll {
                 $_vmBootResult = "" | Select-Object VMName, VMBootStartTime, VMBootEndTime, VMBootTimeInSeconds
                 $_vmBootResult.VMName = ($_vmName).Trim()
                 $_vmBootResult.VMBootStartTime = ([DateTimeOffset]$_statusBootStartTime).DateTime
-                $_vmBootResult.VMBootEndTime = ([DateTimeOffset]$_statusBootEndTime.Time.DateTime).DateTime
+                $_vmBootResult.VMBootEndTime = ([DateTimeOffset]$_statusBootEndTime).DateTime
                 if($_vmBootResult.VMBootEndTime -gt $_vmBootResult.VMBootStartTime) {
                     $_vmBootResult.VMBootTimeInSeconds = [float]($_vmBootResult.VMBootEndTime - $_vmBootResult.VMBootStartTime).TotalSeconds
                 }
@@ -351,6 +351,7 @@ function VMBootAll {
                     $_vmBootResult.VMBootTimeInSeconds = 0
                     "VM boot end time is invalid for VM $_vmName" | Tee-Object -FilePath $logFile -Append
                 }
+
                 return $_vmBootResult
 
             } -ArgumentList $vm.Name,$vm.ResourceGroupName,$location,$logFile,$AzureSubscription,$resourceManagerEndpoint, $azureToken | Out-Null
