@@ -92,6 +92,7 @@ function VMBootAll {
     $activeDirectoryEndpoint = $($endptres.authentication.loginEndpoint) 
     $activeDirectoryEndpoint = $($endptres.authentication.loginEndpoint).TrimEnd("/") + "/" 
 
+    [System.Reflection.Assembly]::LoadFile("$env:SystemDrive\WindowsAzure\Packages\Microsoft.IdentityModel.Clients.ActiveDirectory.dll") | Out-Null
     $clientId = "1950a258-227b-4e31-a9cf-717495945fc2"
     
     $contextAuthorityEndpoint = ([System.IO.Path]::Combine($activeDirectoryEndpoint, $aadTenantId)).Replace('\','/')
