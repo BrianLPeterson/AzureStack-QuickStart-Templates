@@ -47,8 +47,6 @@ Configuration ConfigureVMBootAll
     $VMAdminPasswordBSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($VMAdminCreds.Password)
     $VMAdminPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($VMAdminPasswordBSTR)
 
-
-
     # DSC Script Resource - VM Bootstorm
     Script VMBAll
     {
@@ -132,11 +130,14 @@ Configuration ConfigureVMBootAll
 "@
                 [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
                 Write-Warning -Message "CertificatePolicy set to ignore all server certificate errors"
+
+                Register-PSRepository -Name "PSGallery" –SourceLocation "https://www.powershellgallery.com/api/v2/" -InstallationPolicy Trusted
+
                 $count = 0
                 $installFinished = $false
                 while (!$installFinished -and $count -lt 5) {
                     try {
-                        Install-Module -Name AzureRM -RequiredVersion 1.2.9 -Scope AllUsers -ErrorAction Stop -Confirm:0                        
+                        Install-Module -Name AzureRM -RequiredVersion 1.2.10 -Scope AllUsers -ErrorAction Stop -Confirm:0
                         $installFinished = $true
                     }
                     catch {
