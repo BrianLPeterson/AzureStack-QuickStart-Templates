@@ -256,6 +256,9 @@ function VMBootAll {
         "All $vmCount VMs are turned off" | Tee-Object -FilePath $logFilePath -Append
     }
 
+    # Get Token again incase it needs refreshing
+    $azureToken = ($authContext.AcquireToken($activeDirectoryServiceEndpointResourceId, $clientId, $userCredential)).AccessToken
+
     ####################
     ### VM BOOTSTORM ###
     ####################
@@ -310,20 +313,31 @@ function VMBootAll {
                 "Boot succeeded at $_dateAfterBoot" | Tee-Object -FilePath $logFile -Append
                 # Get VM Boot End Time (Ignore NULL values of Time)
 
-                # Make the calls using REST and passing in token to avoid too many fast Auth calls
-                $getAzureVM = @{
-                        Uri ='{0}/subscriptions/{1}/resourceGroups/{2}/providers/Microsoft.Compute/virtualMachines/{3}?$expand=instanceView&api-version=2015-06-15' `
-                            -f $armEndpoint, $azureSubscription, $_resourceGroupName, $_vmName
-                        Method = "Get"
-                        Headers = @{ "Authorization" = "Bearer " + $token }
-                        ContentType = "application/json"
-                    }
+                $numberOfRetries = 30
+                $retries = 0
 
-                "URI: $($getAzureVM.Uri)" | Tee-Object -FilePath $logFile -Append
+                do
+                {
+                    "Waiting for boot.  Retry Count $retries" | Tee-Object -FilePath $logFile -Append
 
-                $result = Invoke-RestMethod @getAzureVM
+                    Start-Sleep -Seconds 60
+                    $retries++
 
-                $_statusBootEndTime = $result.Properties.InstanceView.Statuses[0] | Select-Object Time | Where-Object {$_.Time -ne $null}
+                    # Make the calls using REST and passing in token to avoid too many fast Auth calls
+                    $getAzureVM = @{
+                            Uri ='{0}/subscriptions/{1}/resourceGroups/{2}/providers/Microsoft.Compute/virtualMachines/{3}?$expand=instanceView&api-version=2015-06-15' `
+                                -f $armEndpoint, $azureSubscription, $_resourceGroupName, $_vmName
+                            Method = "Get"
+                            Headers = @{ "Authorization" = "Bearer " + $token }
+                            ContentType = "application/json"
+                        }
+
+                    "URI: $($getAzureVM.Uri)" | Tee-Object -FilePath $logFile -Append
+
+                    $result = Invoke-RestMethod @getAzureVM
+
+                    $_statusBootEndTime = $result.Properties.InstanceView.Statuses[0].Time
+                }while(!$_statusBootEndTime -and $retries -lt $numberOfRetries)
 
                 # Create custom vm boot result object
                 $_vmBootResult = "" | Select-Object VMName, VMBootStartTime, VMBootEndTime, VMBootTimeInSeconds
