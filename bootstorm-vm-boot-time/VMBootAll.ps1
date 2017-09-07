@@ -131,8 +131,6 @@ Configuration ConfigureVMBootAll
                 [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
                 Write-Warning -Message "CertificatePolicy set to ignore all server certificate errors"
 
-                Register-PSRepository -Name "PSGallery" –SourceLocation "https://www.powershellgallery.com/api/v2/" -InstallationPolicy Trusted
-
                 $count = 0
                 $installFinished = $false
                 while (!$installFinished -and $count -lt 5) {
