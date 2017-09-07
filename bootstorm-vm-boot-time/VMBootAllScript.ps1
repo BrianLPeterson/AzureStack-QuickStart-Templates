@@ -25,6 +25,9 @@ param (
     [string]$AzureSubscription
 )
 
+"Importing Azure module" | Tee-Object -FilePath $logFilePath -Append
+Import-Module AzureRm -ErrorAction Stop | Out-Null
+
 function VMBootAll {
     
     # Azure uses AzureAdApplicationId and AzureAdApplicationPassword values as AzureUserName and AzurePassword parameters respectively
