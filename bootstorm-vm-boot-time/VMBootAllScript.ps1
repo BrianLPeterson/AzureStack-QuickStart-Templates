@@ -92,7 +92,6 @@ function VMBootAll {
 
     $activeDirectoryServiceEndpointResourceId = $($endptres.authentication.audiences[0])
     $aadTenantId = $tenant 
-    $activeDirectoryEndpoint = $($endptres.authentication.loginEndpoint) 
     $activeDirectoryEndpoint = $($endptres.authentication.loginEndpoint).TrimEnd("/") + "/" 
     $clientId = "1950a258-227b-4e31-a9cf-717495945fc2"
     
