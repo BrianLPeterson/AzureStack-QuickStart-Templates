@@ -172,7 +172,7 @@ function VMBootAll {
             $_date = Get-Date -Format hh:mmtt
             $logFile = $localPath + "\VmBoot_" + $_vmName + ".log"
             "Turning off VM $_vmName in parallel at $_date" | Tee-Object -FilePath $logFilePath -Append
-           
+            
             Start-Job -ScriptBlock {
                 param($_vmName,$_resourceGroupName,$location,$logFile,$azureSubscription,$armEndpoint,$token)
 
@@ -214,17 +214,20 @@ function VMBootAll {
                 "$d VM $_vmName Stopped" | Tee-Object -FilePath $logFile -Append
             } -ArgumentList $_vmName,$vm.ResourceGroupName,$location,$logFile,$AzureSubscription,$resourceManagerEndpoint,$azureToken | Out-Null
 
+            # Adding a to help prevent overload
+            Start-Sleep -Seconds 1
+
             $resourceGroupName = $vm.ResourceGroupName
         }
     }
 
-    $numberOfRetries = 60
+    $numberOfRetries = 90
 
     # Wait for background jobs
     $jobs = Get-Job | Where-Object {$_.State -eq "Running"}
     $noOfRetries = $numberOfRetries
     while(($jobs.Count -gt 0) -and ($noOfRetries -gt 0)) {
-        "Waiting for VMs to all be stopped. $($jobs.Count) jobs left. Retries  left: $noOfRetries" | Tee-Object -FilePath $logFilePath -Append
+        "Waiting for VMs to all be stopped. $($jobs.Count) jobs left. Retries left: $noOfRetries" | Tee-Object -FilePath $logFilePath -Append
         Start-Sleep -Seconds 15
         $noOfRetries--
         $jobs = Get-Job | Where-Object {$_.State -eq "Running"}
@@ -236,25 +239,41 @@ function VMBootAll {
 
     # Check if all VMs are deallocated (i.e. turned off)
     $noOfRetries = $numberOfRetries
-    $noOfRunningVMs = [int32]::MaxValue
-    while(($noOfRetries -gt 0) -and ($noOfRunningVMs -gt 0)) {
-        Start-Sleep -Seconds 60
-        $noOfRunningVMs = 0
-        foreach($vm in $vms) {
+    [System.Collections.ArrayList]$runningVMs = $vms
+    while(($noOfRetries -gt 0) -and ($runningVMs.Count -gt 0)) {
+        Start-Sleep -Seconds 30
+
+        foreach($vm in $runningVMs) {
             # All VMs except jump box VM
+            [System.Collections.ArrayList]$removeArray = @()
+
             if($vm.Name -match "[0-9]$") {
                 try {
+                    "Start Get-AzureRmVM on $($vm.Name)" | Tee-Object -FilePath $logFilePath -Append
                     $vmStatus = Get-AzureRmVM -Name $vm.Name -ResourceGroupName $vm.ResourceGroupName -Status
+                    "End Get-AzureRmVM on $($vm.Name) : Status '$($vmStatus.Statuses[1].Code)'" | Tee-Object -FilePath $logFilePath -Append
                 } catch {
                     "Get-AzureRmVM on $($vm.Name) failed $_" | Tee-Object -FilePath $logFilePath -Append
                 }
+
                 $isVmRunning = $vmStatus.Statuses[1].Code.Contains("running")
-                if($isVmRunning -eq $true) {
-                    $noOfRunningVMs += 1
+
+                if($isVmRunning -eq $false) {
+                    $removeArray.Add($vm)
                 }
+
+                # Adding small delay to help prevent overload
+                Start-Sleep -Seconds 1
             }
         }
-        "Waiting for all VMs to no longer be running. Running VMs: $noOfRunningVMs" | Tee-Object -FilePath $logFilePath -Append
+
+        foreach($vm in $RemoveArray) {
+            $runningVMs.Remove($vm)
+        }
+
+        $RemoveArray.Clear()
+
+        "Waiting for all VMs to no longer be running. Running VMs: $($runningVMs.Count). Retries left: $noOfRetries" | Tee-Object -FilePath $logFilePath -Append
         $noOfRetries -= 1
     }
     if($noOfRunningVMs -gt 0) {
@@ -363,6 +382,9 @@ function VMBootAll {
                 return $_vmBootResult
 
             } -ArgumentList $vm.Name,$vm.ResourceGroupName,$location,$logFile,$AzureSubscription,$resourceManagerEndpoint, $azureToken | Out-Null
+
+            # Adding small delay to help prevent overload
+            Start-Sleep -Seconds 1
         }
     }
     
