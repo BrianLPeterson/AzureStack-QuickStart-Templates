@@ -214,14 +214,11 @@ function VMBootAll {
                 "$d VM $_vmName Stopped" | Tee-Object -FilePath $logFile -Append
             } -ArgumentList $_vmName,$vm.ResourceGroupName,$location,$logFile,$AzureSubscription,$resourceManagerEndpoint,$azureToken | Out-Null
 
-            # Adding a to help prevent overload
-            Start-Sleep -Seconds 1
-
             $resourceGroupName = $vm.ResourceGroupName
         }
     }
 
-    $numberOfRetries = 90
+    $numberOfRetries = 60
 
     # Wait for background jobs
     $jobs = Get-Job | Where-Object {$_.State -eq "Running"}
@@ -262,9 +259,6 @@ function VMBootAll {
                 if($isVmRunning -eq $false) {
                     $removeArray.Add($vm)
                 }
-
-                # Adding small delay to help prevent overload
-                Start-Sleep -Seconds 1
             }
         }
 
@@ -383,9 +377,6 @@ function VMBootAll {
                 return $_vmBootResult
 
             } -ArgumentList $vm.Name,$vm.ResourceGroupName,$location,$logFile,$AzureSubscription,$resourceManagerEndpoint, $azureToken | Out-Null
-
-            # Adding small delay to help prevent overload
-            Start-Sleep -Seconds 1
         }
     }
     
