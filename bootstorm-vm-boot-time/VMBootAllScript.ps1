@@ -240,7 +240,8 @@ function VMBootAll {
     # Check if all VMs are deallocated (i.e. turned off)
     $noOfRetries = $numberOfRetries
     [System.Collections.ArrayList]$runningVMs = $vms
-    while(($noOfRetries -gt 0) -and ($runningVMs.Count -gt 0)) {
+    #1 VM = the controller VM
+    while(($noOfRetries -gt 0) -and ($runningVMs.Count -gt 1)) {
         Start-Sleep -Seconds 30
 
         foreach($vm in $runningVMs) {
