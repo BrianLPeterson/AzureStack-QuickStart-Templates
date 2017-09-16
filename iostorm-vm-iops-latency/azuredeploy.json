@@ -429,7 +429,7 @@
       "name": "[concat(variables('vmName'),'/dscExtension')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'))]"
+        "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'))]","vmLoop"
       ],
       "properties": {
         "publisher": "Microsoft.Powershell",
@@ -468,7 +468,7 @@
         "count": "[parameters('vmCount')]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'),copyIndex())]","vmLoop"
+        "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'),copyIndex())]"
       ],
       "properties": {
         "publisher": "Microsoft.Powershell",
