@@ -468,7 +468,7 @@
         "count": "[parameters('vmCount')]"
       },
       "dependsOn": [
-        "vmLoop"
+        "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'),copyIndex())]","vmLoop"
       ],
       "properties": {
         "publisher": "Microsoft.Powershell",
