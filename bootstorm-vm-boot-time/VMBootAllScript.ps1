@@ -247,9 +247,9 @@ function VMBootAll {
 
             if($vm.Name -match "[0-9]$") {
                 try {
-                    "Start Get-AzureRmVM on $($vm.Name)" | Tee-Object -FilePath $logFilePath -Append
+                    "$(Get-Date -displayhint Time) Start Get-AzureRmVM on $($vm.Name)" | Tee-Object -FilePath $logFilePath -Append
                     $vmStatus = Get-AzureRmVM -Name $vm.Name -ResourceGroupName $vm.ResourceGroupName -Status
-                    "End Get-AzureRmVM on $($vm.Name) : Status '$($vmStatus.Statuses[1].Code)'" | Tee-Object -FilePath $logFilePath -Append
+                    "$(Get-Date -displayhint Time) End Get-AzureRmVM on $($vm.Name) : Status '$($vmStatus.Statuses[1].Code)'" | Tee-Object -FilePath $logFilePath -Append
                 } catch {
                     "Get-AzureRmVM on $($vm.Name) failed $_" | Tee-Object -FilePath $logFilePath -Append
                 }
