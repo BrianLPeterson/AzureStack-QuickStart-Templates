@@ -241,10 +241,10 @@ function VMBootAll {
     while(($noOfRetries -gt 0) -and ($runningVMs.Count -gt 1)) {
         Start-Sleep -Seconds 30
 
-        foreach($vm in $runningVMs) {
-            # All VMs except jump box VM
-            [System.Collections.ArrayList]$removeArray = @()
+        # All VMs except jump box VM
+        [System.Collections.ArrayList]$removeArray = @()
 
+        foreach($vm in $runningVMs) {
             if($vm.Name -match "[0-9]$") {
                 try {
                     "$(Get-Date -displayhint Time) Start Get-AzureRmVM on $($vm.Name)" | Tee-Object -FilePath $logFilePath -Append
