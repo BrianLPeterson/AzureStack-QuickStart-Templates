@@ -89,7 +89,7 @@
     "moduleVMBootAll": "VMBootAll.zip",
     "modulesUrlVMBootAll": "[concat(variables('modulesPath'),variables('moduleVMBootAll'))]",
     "configurationFunctionVMBootAll": "VMBootAll.ps1\\ConfigureVMBootAll",
-    "controllerVmSize": "Standard_A2"
+    "controllerVmSize": "Standard_A4"
   },
   "resources": [
     {
